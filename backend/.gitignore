@@ -1,0 +1,23 @@
+# Ignore bundler config
+/.bundle
+
+# Ignore all environment files
+/.env*
+!/.env.example
+
+# Ignore generated logs, temp files and local databases
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/storage/*
+!/storage/.keep
+
+# Ignore pidfiles
+/tmp/pids/*
+!/tmp/pids/.keep
+
+# Ignore uploaded files, assets and secrets
+/public/assets
+/config/master.key
+/config/credentials/*.key
