@@ -8,6 +8,9 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :employees
       get "insights/by_country", to: "insights#by_country"
+      get "insights/by_department", to: "insights#by_department"
+      get "insights/by_job_title",  to: "insights#by_job_title"
+      get "insights/distribution",  to: "insights#distribution"
     end
   end
 
