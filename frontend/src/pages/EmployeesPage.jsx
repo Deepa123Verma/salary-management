@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  Alert, Box, Chip, CircularProgress, MenuItem, Paper, Table, TableBody,
+  Alert, Box, Button, Chip, CircularProgress, MenuItem, Paper, Table, TableBody,
   TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField,
 } from "@mui/material";
 import { api } from "../api";
+import EmployeeDialog from "../components/EmployeeDialog";
 import { COUNTRIES, DEPARTMENTS, STATUSES } from "../constants";
 import { formatMoney } from "../money";
 import { useDebounce } from "../hooks/useDebounce";
@@ -15,8 +16,11 @@ export default function EmployeesPage() {
   const [result, setResult] = useState({ data: [], meta: { total: 0 } });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [dialog, setDialog] = useState({ open: false, employee: null });
 
   const debouncedQuery = useDebounce(filters.q);
+  const reload = useCallback(() => setReloadKey((key) => key + 1), []);
 
   useEffect(() => {
     let ignore = false; // drop stale responses if the filters changed meanwhile
@@ -30,11 +34,26 @@ export default function EmployeesPage() {
 
     return () => { ignore = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQuery, filters.country, filters.department, filters.status, page, perPage]);
+  }, [debouncedQuery, filters.country, filters.department, filters.status, page, perPage, reloadKey]);
 
   const updateFilter = (name) => (event) => {
     setFilters((current) => ({ ...current, [name]: event.target.value }));
     setPage(0);
+  };
+
+  const handleSaved = () => {
+    setDialog({ open: false, employee: null });
+    reload();
+  };
+
+  const handleDelete = async (employee) => {
+    if (!window.confirm(`Delete ${employee.full_name}?`)) return;
+    try {
+      await api.deleteEmployee(employee.id);
+      reload();
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   return (
@@ -58,6 +77,10 @@ export default function EmployeesPage() {
           {STATUSES.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
         </TextField>
         {loading && <CircularProgress size={24} sx={{ alignSelf: "center" }} />}
+        <Button variant="contained" sx={{ ml: "auto" }}
+                onClick={() => setDialog({ open: true, employee: null })}>
+          Add employee
+        </Button>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -72,6 +95,7 @@ export default function EmployeesPage() {
               <TableCell>Country</TableCell>
               <TableCell align="right">Salary</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -86,10 +110,14 @@ export default function EmployeesPage() {
                   <Chip size="small" label={e.status}
                         color={e.status === "active" ? "success" : "default"} />
                 </TableCell>
+                <TableCell align="right">
+                  <Button size="small" onClick={() => setDialog({ open: true, employee: e })}>Edit</Button>
+                  <Button size="small" color="error" onClick={() => handleDelete(e)}>Delete</Button>
+                </TableCell>
               </TableRow>
             ))}
             {!loading && result.data.length === 0 && (
-              <TableRow><TableCell colSpan={6} align="center">No employees found</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} align="center">No employees found</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
@@ -103,6 +131,13 @@ export default function EmployeesPage() {
           onRowsPerPageChange={(e) => { setPerPage(Number(e.target.value)); setPage(0); }}
         />
       </TableContainer>
+
+      <EmployeeDialog
+        open={dialog.open}
+        employee={dialog.employee}
+        onClose={() => setDialog({ open: false, employee: null })}
+        onSaved={handleSaved}
+      />
     </Box>
   );
 }
