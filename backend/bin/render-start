@@ -1,0 +1,5 @@
+#!/bin/bash -e
+# Render free tier has an ephemeral disk, so (re)build the DB on every boot.
+bin/rails db:prepare
+bin/rails runner 'EmployeeSeeder.new.call if Employee.count.zero?'
+exec bin/rails server -b 0.0.0.0 -p "${PORT:-3000}"
