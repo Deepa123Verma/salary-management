@@ -35,6 +35,7 @@ npm run dev               # http://localhost:5173 (proxies /api to :3000)
 ## Run tests
 ```bash
 cd backend && bundle exec rspec
+cd frontend && npm test
 ```
 
 ## Documentation
