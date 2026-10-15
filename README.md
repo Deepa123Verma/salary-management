@@ -2,8 +2,8 @@
 
 Web app for an HR Manager to manage salary data for 10,000 employees across several countries and to answer "how do we pay people?".
 
-- **Live app:** <frontend URL>
-- **API:** <backend URL> (try `/api/v1/insights/by_country`)
+- **Live app:** https://salary-management-ui-2jmm.onrender.com
+- **API:** https://salary-management-ltc2.onrender.com (try `/api/v1/insights/by_country`)
 - **Demo video:** <video link>
 
 > The backend runs on a free Render instance. It sleeps after 15 minutes of inactivity, so the first request can take about a minute. Its SQLite disk is ephemeral, so the database is rebuilt and re-seeded with 10,000 employees on every start. Records added in the live demo do not survive a restart.
